@@ -4,7 +4,7 @@ import yfinance as yf
 import pandas
 
 # Gathering the stock data
-startdate = '2000-01-01'
+startdate = '2010-01-01'
 enddate = '2020-12-31'
 with open('data/symbols.csv') as f:
     for line in f:

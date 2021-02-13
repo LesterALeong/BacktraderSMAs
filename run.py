@@ -4,28 +4,40 @@ import backtrader as bt
 from strategies.BuyHold import BuyHold
 from strategies.MovingCrossover import MovingCrossover
 
-strategies = {
-    'moving_crossover': MovingCrossover,
-    'buy_hold': BuyHold
-}
-
-parser = argparse.ArgumentParser()
-parser.add_argument('strategy', help='which strategy to run', type=str)
-args = parser.parse_args()
-
-if not args.strategy in strategies:
-    print('invalid strategy, must be one of {}'.format(strategies.keys()))
-    sys.exit()
-
 cerebro = bt.Cerebro()
-cerebro.broker.setcash(100000)
+cerebro.broker.setcash(10000)
 
 spy_prices = pd.read_csv('data/spy.csv', index_col='Date', parse_dates=True)
-
 feed = bt.feeds.PandasData(dataname=spy_prices)
 cerebro.adddata(feed)
 
-cerebro.addstrategy(strategies[args.strategy])
+strategies = {
+    "moving_cross": MovingCrossover,
+    "buy_hold": BuyHold,
+}
 
-cerebro.run()
-cerebro.plot()
+try:
+    # parse command line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("strategy", help="Which strategy to run", type=str)
+    args = parser.parse_args()
+
+    if not args.strategy in strategies:
+        print("Invalid strategy, must select one of {}".format(strategies.keys()))
+        sys.exit()
+
+    cerebro.addstrategy(strategy=strategies[args.strategy])
+
+    # if getting error
+    # usage: run.py [-h] strategy
+    # run.py: error: the following arguments are required: strategy
+    # then run script with a key from strategies dictionary
+
+    cerebro.run()
+    cerebro.plot()
+
+except:
+    print('Due to not declaring strategy, running buy-hold backtest')
+    cerebro.addstrategy(strategy=BuyHold)
+    cerebro.run()
+    cerebro.plot()
